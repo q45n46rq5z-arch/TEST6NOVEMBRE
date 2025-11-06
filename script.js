@@ -523,6 +523,45 @@ document.addEventListener('DOMContentLoaded', function() {
                     ['Quantité', quantite || '-']
                 ]);
                 checklist(dimension.verifications);
+                
+                // Message de disclaimer
+                y += lineH * 2;
+                checkAddPage(lineH * 8);
+                
+                // Ligne de séparation
+                pdf.setDrawColor(200);
+                pdf.line(marginX, y, marginX + contentWidth, y);
+                pdf.setDrawColor(0);
+                y += lineH * 2;
+                
+                // Message d'avertissement
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(10);
+                pdf.setTextColor(200, 0, 0); // Rouge pour l'importance
+                const disclaimerTitle = 'AVERTISSEMENT IMPORTANT';
+                const titleWidth = pdf.getTextWidth(disclaimerTitle);
+                pdf.text(disclaimerTitle, marginX + (contentWidth - titleWidth) / 2, y);
+                y += lineH * 1.5;
+                
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(9);
+                pdf.setTextColor(0, 0, 0); // Retour au noir
+                const disclaimerText = 'Ce document est généré par une application en cours de développement et de test. ' +
+                    'En aucun cas ce document ne doit être utilisé pour des projets réels ou des contrôles qualité officiels. ' +
+                    'L\'utilisation de ce document se fait à vos propres risques et périls.';
+                const wrappedDisclaimer = pdf.splitTextToSize(disclaimerText, contentWidth);
+                wrappedDisclaimer.forEach((line, i) => {
+                    checkAddPage(lineH);
+                    pdf.text(line, marginX, y + i * lineH);
+                });
+                y += wrappedDisclaimer.length * lineH + lineH;
+                
+                // Contact
+                checkAddPage(lineH * 2);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(9);
+                pdf.text('Pour plus d\'informations, contacter : baptistemail15@gmail.com', marginX, y);
+                
                 pdf.save('ADF_I362_Checklist.pdf');
             } catch (error) {
                 console.error('Erreur lors de l\'export PDF:', error);
