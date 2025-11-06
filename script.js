@@ -546,8 +546,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 pdf.setFont('helvetica', 'normal');
                 pdf.setFontSize(9);
                 pdf.setTextColor(0, 0, 0); // Retour au noir
-                const disclaimerText = 'Ce document est généré par une application en cours de développement et de test. ' +
-                    'En aucun cas ce document ne doit être utilisé pour des projets réels ou des contrôles qualité officiels. ' +
+                const disclaimerText = 'En aucun cas ce document ne doit être utilisé pour des projets réels ou des contrôles qualité officiels. ' +
                     'L\'utilisation de ce document se fait à vos propres risques et périls.';
                 const wrappedDisclaimer = pdf.splitTextToSize(disclaimerText, contentWidth);
                 wrappedDisclaimer.forEach((line, i) => {
