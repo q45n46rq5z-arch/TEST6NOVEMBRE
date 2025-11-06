@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groupe ADF - I362 - Contrôle Réception Matière</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>Vérification Matière à Réception</h1>
+                    <p class="subtitle">Affaire I362 — Système de contrôle qualité avec certificat de matière</p>
+                </div>
+                <div class="company-name">Groupe ADF</div>
+            </div>
+        </header>
+
+        <div class="selection-panel">
+            <div class="actions-row">
+                <button id="export-pdf-btn" class="print-button" type="button">Exporter en PDF</button>
+                <button id="print-btn" class="print-button" type="button">Imprimer</button>
+            </div>
+            <div class="form-group">
+                <label for="norme-select">Norme / Code :</label>
+                <select id="norme-select" class="select-input">
+                    <option value="">-- Sélectionner une norme --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="matiere-select">Matière :</label>
+                <select id="matiere-select" class="select-input" disabled>
+                    <option value="">-- Sélectionner d'abord une norme --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="forme-select">Forme du produit :</label>
+                <select id="forme-select" class="select-input" disabled>
+                    <option value="">-- Sélectionner une forme --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="referentiel-select">Référentiel EN :</label>
+                <select id="referentiel-select" class="select-input" disabled>
+                    <option value="">-- Sélectionner un référentiel --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="classe-select">Classe de tolérance d'épaisseur :</label>
+                <select id="classe-select" class="select-input" disabled>
+                    <option value="">-- Choisir A, B, C ou D --</option>
+                    <option value="A">Classe A</option>
+                    <option value="B">Classe B</option>
+                    <option value="C">Classe C</option>
+                    <option value="D">Classe D</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="epaisseur-select">Épaisseur nominale (t) :</label>
+                <select id="epaisseur-select" class="select-input" disabled>
+                    <option value="">-- Sélectionner une épaisseur --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dimension-select">Dimensions :</label>
+                <select id="dimension-select" class="select-input" disabled>
+                    <option value="">-- Sélectionner d'abord une matière --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quantite-input">Quantité reçue :</label>
+                <input type="number" id="quantite-input" class="number-input" placeholder="Ex: 10" min="1">
+            </div>
+        </div>
+
+        <div id="checklist-container" class="checklist-container" style="display: none;">
+            <h2>Checklist de Vérification</h2>
+            <div class="checklist-info">
+                <div class="info-item">
+                    <strong>Norme :</strong> <span id="info-norme">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Matière :</strong> <span id="info-matiere">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Référentiel EN :</strong> <span id="info-referentiel">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Dimensions :</strong> <span id="info-dimension">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Quantité :</strong> <span id="info-quantite">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Classe épaisseur :</strong> <span id="info-classe">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Épaisseur (t) :</strong> <span id="info-epaisseur">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Tolérances t :</strong> <span id="info-tolerances">-</span>
+                </div>
+            </div>
+            <ul id="checklist-items" class="checklist-items">
+                <!-- Les éléments de vérification seront ajoutés ici -->
+            </ul>
+        </div>
+
+        <div id="no-selection" class="no-selection">
+            <p>Veuillez sélectionner une norme, une matière et des dimensions pour voir la checklist de vérification.</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Groupe ADF - Tous droits réservés</p>
+            <p class="copyright-note">Usage strictement réservé à Groupe ADF. Propriété intellectuelle protégée.</p>
+        </footer>
+    </div>
+
+    <!-- Zone imprimable générée dynamiquement -->
+    <div id="print-area" aria-hidden="true"></div>
+
+    <script src="data.js"></script>
+    <!-- Librairies pour export PDF sans impression -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
