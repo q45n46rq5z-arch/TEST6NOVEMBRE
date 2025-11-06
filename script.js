@@ -365,7 +365,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Export PDF direct (vectoriel): génération avec jsPDF (texte/lignes)
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener('click', function() {
-            if (!(window.jspdf && window.jspdf.jsPDF)) {
+            // Vérifier que jsPDF est disponible
+            let jsPDF;
+            if (window.jspdf && window.jspdf.jsPDF) {
+                jsPDF = window.jspdf.jsPDF;
+            } else if (window.jsPDF) {
+                jsPDF = window.jsPDF;
+            } else {
                 alert('Export PDF indisponible (jsPDF manquant). Vérifiez votre connexion internet.');
                 return;
             }
@@ -374,6 +380,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const matiereId = matiereSelect.value;
             const dimensionId = dimensionSelect.value;
             const quantite = quantiteInput.value;
+            const referentiel = referentielSelect ? referentielSelect.value : '';
+            const classe = (document.getElementById('classe-select') || {}).value || '';
+            const epaisseur = (document.getElementById('epaisseur-select') || {}).value || '';
+            let tolText = '-';
+            if (classe && epaisseur && toleranceTable[classe]) {
+                const found = toleranceTable[classe].find(e => e.range === epaisseur);
+                if (found) tolText = `${found.min} / +${found.max} mm`;
+            }
 
             if (!normeId || !matiereId || !dimensionId) {
                 alert('Veuillez sélectionner une norme, une matière et des dimensions avant l\'export.');
@@ -384,7 +398,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const matiere = norme.matieres[matiereId];
             const dimension = matiere.dimensions[dimensionId];
 
-            const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
 
             // Mise en page
