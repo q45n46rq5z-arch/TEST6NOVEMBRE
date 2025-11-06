@@ -365,163 +365,169 @@ document.addEventListener('DOMContentLoaded', function() {
     // Export PDF direct (vectoriel): génération avec jsPDF (texte/lignes)
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener('click', function() {
-            // Vérifier que jsPDF est disponible
-            let jsPDF;
-            if (window.jspdf && window.jspdf.jsPDF) {
-                jsPDF = window.jspdf.jsPDF;
-            } else if (window.jsPDF) {
-                jsPDF = window.jsPDF;
-            } else {
-                alert('Export PDF indisponible (jsPDF manquant). Vérifiez votre connexion internet.');
-                return;
-            }
-
-            const normeId = normeSelect.value;
-            const matiereId = matiereSelect.value;
-            const dimensionId = dimensionSelect.value;
-            const quantite = quantiteInput.value;
-            const referentiel = referentielSelect ? referentielSelect.value : '';
-            const classe = (document.getElementById('classe-select') || {}).value || '';
-            const epaisseur = (document.getElementById('epaisseur-select') || {}).value || '';
-            let tolText = '-';
-            if (classe && epaisseur && toleranceTable[classe]) {
-                const found = toleranceTable[classe].find(e => e.range === epaisseur);
-                if (found) tolText = `${found.min} / +${found.max} mm`;
-            }
-
-            if (!normeId || !matiereId || !dimensionId) {
-                alert('Veuillez sélectionner une norme, une matière et des dimensions avant l\'export.');
-                return;
-            }
-
-            const norme = verificationData.normes[normeId];
-            const matiere = norme.matieres[matiereId];
-            const dimension = matiere.dimensions[dimensionId];
-
-            const pdf = new jsPDF('p', 'mm', 'a4');
-
-            // Mise en page
-            const pageWidth = 210;
-            const pageHeight = 297;
-            const marginX = 15;
-            const marginY = 15;
-            const contentWidth = pageWidth - marginX * 2;
-            const lineH = 6; // interligne
-            let y = marginY;
-
-            pdf.setDrawColor(0);
-            pdf.setTextColor(0);
-            pdf.setLineWidth(0.3);
-
-            function checkAddPage(extra = 0) {
-                if (y + extra > pageHeight - marginY) {
-                    pdf.addPage();
-                    y = marginY;
+            try {
+                // Vérifier que jsPDF est disponible
+                let jsPDF;
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    jsPDF = window.jspdf.jsPDF;
+                } else if (window.jsPDF) {
+                    jsPDF = window.jsPDF;
+                } else {
+                    console.error('jsPDF non trouvé. window.jspdf:', window.jspdf, 'window.jsPDF:', window.jsPDF);
+                    alert('Export PDF indisponible (jsPDF manquant). Vérifiez votre connexion internet et réessayez.');
+                    return;
                 }
-            }
 
-            function title(text) {
-                pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(14);
-                const textWidth = pdf.getTextWidth(text);
-                const x = marginX + (contentWidth - textWidth) / 2;
-                pdf.text(text, x, y);
-                y += lineH + 2;
-            }
+                const normeId = normeSelect.value;
+                const matiereId = matiereSelect.value;
+                const dimensionId = dimensionSelect.value;
+                const quantite = quantiteInput.value;
+                const referentiel = referentielSelect ? referentielSelect.value : '';
+                const classe = (document.getElementById('classe-select') || {}).value || '';
+                const epaisseur = (document.getElementById('epaisseur-select') || {}).value || '';
+                let tolText = '-';
+                if (classe && epaisseur && toleranceTable[classe]) {
+                    const found = toleranceTable[classe].find(e => e.range === epaisseur);
+                    if (found) tolText = `${found.min} / +${found.max} mm`;
+                }
 
-            function subtitle(text) {
-                pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(12);
-                pdf.text(text, marginX, y);
-                y += lineH;
-            }
+                if (!normeId || !matiereId || !dimensionId) {
+                    alert('Veuillez sélectionner une norme, une matière et des dimensions avant l\'export.');
+                    return;
+                }
 
-            function infoTable(rows) {
-                pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(11);
-                const labelW = 40; // largeur fixe pour étiquettes
-                const valueW = contentWidth / 2 - labelW - 4; // deux colonnes
-                let col = 0;
-                rows.forEach(([label, value]) => {
-                    const baseX = marginX + col * (contentWidth / 2);
-                    const labelX = baseX;
-                    const valueX = baseX + labelW;
-                    const wrapped = pdf.splitTextToSize(String(value), valueW);
-                    const blockH = Math.max(lineH, wrapped.length * lineH);
-                    checkAddPage(blockH);
+                const norme = verificationData.normes[normeId];
+                const matiere = norme.matieres[matiereId];
+                const dimension = matiere.dimensions[dimensionId];
+
+                const pdf = new jsPDF('p', 'mm', 'a4');
+
+                // Mise en page
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const marginX = 15;
+                const marginY = 15;
+                const contentWidth = pageWidth - marginX * 2;
+                const lineH = 6; // interligne
+                let y = marginY;
+
+                pdf.setDrawColor(0);
+                pdf.setTextColor(0);
+                pdf.setLineWidth(0.3);
+
+                function checkAddPage(extra = 0) {
+                    if (y + extra > pageHeight - marginY) {
+                        pdf.addPage();
+                        y = marginY;
+                    }
+                }
+
+                function title(text) {
                     pdf.setFont('helvetica', 'bold');
-                    pdf.text(label + ':', labelX, y);
+                    pdf.setFontSize(14);
+                    const textWidth = pdf.getTextWidth(text);
+                    const x = marginX + (contentWidth - textWidth) / 2;
+                    pdf.text(text, x, y);
+                    y += lineH + 2;
+                }
+
+                function subtitle(text) {
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(12);
+                    pdf.text(text, marginX, y);
+                    y += lineH;
+                }
+
+                function infoTable(rows) {
                     pdf.setFont('helvetica', 'normal');
-                    wrapped.forEach((t, i) => pdf.text(t, valueX, y + i * lineH));
-                    // lignes guides optionnelles
-                    y += blockH;
-                    // basculer colonne
-                    col = (col + 1) % 2;
-                    if (col === 0) {
-                        // ligne de séparation horizontale entre rangées
+                    pdf.setFontSize(11);
+                    const labelW = 40; // largeur fixe pour étiquettes
+                    const valueW = contentWidth / 2 - labelW - 4; // deux colonnes
+                    let col = 0;
+                    rows.forEach(([label, value]) => {
+                        const baseX = marginX + col * (contentWidth / 2);
+                        const labelX = baseX;
+                        const valueX = baseX + labelW;
+                        const wrapped = pdf.splitTextToSize(String(value), valueW);
+                        const blockH = Math.max(lineH, wrapped.length * lineH);
+                        checkAddPage(blockH);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.text(label + ':', labelX, y);
+                        pdf.setFont('helvetica', 'normal');
+                        wrapped.forEach((t, i) => pdf.text(t, valueX, y + i * lineH));
+                        // lignes guides optionnelles
+                        y += blockH;
+                        // basculer colonne
+                        col = (col + 1) % 2;
+                        if (col === 0) {
+                            // ligne de séparation horizontale entre rangées
+                            pdf.setDrawColor(200);
+                            pdf.line(marginX, y + 1, marginX + contentWidth, y + 1);
+                            pdf.setDrawColor(0);
+                            y += 3;
+                        }
+                    });
+                    // si une seule colonne utilisée sur la dernière rangée, force séparation
+                    if (col === 1) {
                         pdf.setDrawColor(200);
                         pdf.line(marginX, y + 1, marginX + contentWidth, y + 1);
                         pdf.setDrawColor(0);
                         y += 3;
                     }
-                });
-                // si une seule colonne utilisée sur la dernière rangée, force séparation
-                if (col === 1) {
-                    pdf.setDrawColor(200);
-                    pdf.line(marginX, y + 1, marginX + contentWidth, y + 1);
-                    pdf.setDrawColor(0);
-                    y += 3;
                 }
-            }
 
-            function checklist(items) {
-                subtitle('Checklist de vérification');
-                pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(11);
-                const box = 4.5;
-                const gap = 3;
-                const textW = contentWidth - box - gap;
-                items.forEach(text => {
-                    const wrapped = pdf.splitTextToSize(String(text), textW);
-                    const blockH = Math.max(box, wrapped.length * lineH);
-                    checkAddPage(blockH + 1);
-                    // case (alignée verticalement avec le texte)
-                    const yMid = y - (lineH / 2) + 1; // centre visuel de la ligne
-                    const boxTop = yMid - (box / 2);
-                    pdf.rect(marginX, boxTop, box, box);
-                    // texte
-                    wrapped.forEach((t, i) => pdf.text(t, marginX + box + gap, y + i * lineH));
-                    y += blockH + 1;
-                });
-                y += lineH;
-                checkAddPage(lineH);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text('Réceptionnaire (signature):', marginX, y);
-                pdf.setFont('helvetica', 'normal');
-                pdf.text('______________________', marginX + 60, y);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text('Date:', marginX + 120, y);
-                pdf.setFont('helvetica', 'normal');
-                pdf.text('________________', marginX + 135, y);
-            }
+                function checklist(items) {
+                    subtitle('Checklist de vérification');
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(11);
+                    const box = 4.5;
+                    const gap = 3;
+                    const textW = contentWidth - box - gap;
+                    items.forEach(text => {
+                        const wrapped = pdf.splitTextToSize(String(text), textW);
+                        const blockH = Math.max(box, wrapped.length * lineH);
+                        checkAddPage(blockH + 1);
+                        // case (alignée verticalement avec le texte)
+                        const yMid = y - (lineH / 2) + 1; // centre visuel de la ligne
+                        const boxTop = yMid - (box / 2);
+                        pdf.rect(marginX, boxTop, box, box);
+                        // texte
+                        wrapped.forEach((t, i) => pdf.text(t, marginX + box + gap, y + i * lineH));
+                        y += blockH + 1;
+                    });
+                    y += lineH;
+                    checkAddPage(lineH);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text('Réceptionnaire (signature):', marginX, y);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text('______________________', marginX + 60, y);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text('Date:', marginX + 120, y);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text('________________', marginX + 135, y);
+                }
 
-            title('Contrôle réception matière — Affaire I362');
-            subtitle('Informations');
-            const now = new Date();
-            infoTable([
-                ['Entreprise', 'Groupe ADF'],
-                ['Date', `${now.toLocaleDateString('fr-FR')} ${now.toLocaleTimeString('fr-FR')}`],
-                ['Norme / Code', norme.nom],
-                ['Matière', matiere.nom],
-                ['Référentiel EN', referentiel || '-'],
-                ['Classe épaisseur', classe || '-'],
-                ['Épaisseur (t)', epaisseur || '-'],
-                ['Tolérances t', tolText],
-                ['Dimensions', dimension.nom],
-                ['Quantité', quantite || '-']
-            ]);
-            checklist(dimension.verifications);
-            pdf.save('ADF_I362_Checklist.pdf');
+                title('Contrôle réception matière — Affaire I362');
+                subtitle('Informations');
+                const now = new Date();
+                infoTable([
+                    ['Entreprise', 'Groupe ADF'],
+                    ['Date', `${now.toLocaleDateString('fr-FR')} ${now.toLocaleTimeString('fr-FR')}`],
+                    ['Norme / Code', norme.nom],
+                    ['Matière', matiere.nom],
+                    ['Référentiel EN', referentiel || '-'],
+                    ['Classe épaisseur', classe || '-'],
+                    ['Épaisseur (t)', epaisseur || '-'],
+                    ['Tolérances t', tolText],
+                    ['Dimensions', dimension.nom],
+                    ['Quantité', quantite || '-']
+                ]);
+                checklist(dimension.verifications);
+                pdf.save('ADF_I362_Checklist.pdf');
+            } catch (error) {
+                console.error('Erreur lors de l\'export PDF:', error);
+                alert('Erreur lors de l\'export PDF: ' + error.message + '\nVérifiez la console pour plus de détails.');
+            }
         });
     }
 });
